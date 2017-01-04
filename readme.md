@@ -1,5 +1,5 @@
 # heart-rate-analyzer
-_python program to analyze fitbit heart rate data_  
+_python program to analyze fitbit heart rate data for the BC Children's hospital_  
 
 #### Setup
     After cloning, run `pip install -r requirements.txt`    
