@@ -97,6 +97,7 @@ def analyze(raw, patient, age, shell):
     high = 0.8 * pred
     mid = 0.6 * pred
     low = 0.4 * pred
+    bound = [[high, 1000], [mid, high], [low, mid], [-1, low]]
 
     data = []
     datum = []  # stores all heart rate data for one day
@@ -117,74 +118,22 @@ def analyze(raw, patient, age, shell):
     for day, rate in raw:
         if day.date() == today:
             datum.append(rate)
-            if band == 0:
-                if rate >= high:
-                    bout[0].append(rate)
-                    end = day
-                elif end - start < interval:
-                    if len(bout[0]) > 0:
-                        bout[0] = []
-                    start = day
-                    end = day
-                else:
-                    bouts[band]['time'] += (end - start)
-                    bouts[band]['rates'].extend(bout[0])
-                    bouts[band]['count'] += 1
+            if bound[band][0] <= rate < bound[band][1]:
+                bout[band].append(rate)
+                end = day
+            elif end - start < interval:
+                if len(bout[band]) > 0:
+                    bout[band] = []
+                start = day
+                end = day
+            else:
+                bouts[band]['time'] += (end - start)
+                bouts[band]['rates'].extend(bout[band])
+                bouts[band]['count'] += 1
 
-                    bout[0] = []
-                    start = day
-                    end = day
-            elif band == 1:
-                if mid <= rate < high:
-                    bout[1].append(rate)
-                    end = day
-                elif end - start < interval:
-                    if len(bout[1]) > 0:
-                        bout[1] = []
-                    start = day
-                    end = day
-                else:
-                    bouts[band]['time'] += (end - start)
-                    bouts[band]['rates'].extend(bout[1])
-                    bouts[band]['count'] += 1
-
-                    bout[1] = []
-                    start = day
-                    end = day
-            elif band == 2:
-                if low <= rate < mid:
-                    bout[2].append(rate)
-                    end = day
-                elif end - start < interval:
-                    if len(bout[2]) > 0:
-                        bout[2] = []
-                    start = day
-                    end = day
-                else:
-                    bouts[band]['time'] += (end - start)
-                    bouts[band]['rates'].extend(bout[2])
-                    bouts[band]['count'] += 1
-
-                    bout[2] = []
-                    start = day
-                    end = day
-            elif band == 3:
-                if rate < low:
-                    bout[3].append(rate)
-                    end = day
-                elif end - start < interval:
-                    if len(bout[3]) > 0:
-                        bout[3] = []
-                    start = day
-                    end = day
-                else:
-                    bouts[band]['time'] += (end - start)
-                    bouts[band]['rates'].extend(bout[3])
-                    bouts[band]['count'] += 1
-
-                    bout[3] = []
-                    start = day
-                    end = day
+                bout[band] = []
+                start = day
+                end = day
 
             band = (rate >= high) * 0 + (mid <= rate < high) * 1 + (low <= rate < mid) * 2 + (rate < low) * 3
 
