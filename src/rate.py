@@ -67,29 +67,9 @@ def analyze(raw, patient, age, shell):
     :param shell: program terminal
     :return: none
     """
-    progress = Progress(len(raw), shell)
+    # constants
     interval = dt.timedelta(minutes=10)
-    pred = 220 - age
-    high = 0.8 * pred
-    mid = 0.6 * pred
-    low = 0.4 * pred
-
-    today = raw[0, 0].date()
-
-    datum = []
-    data = []
-
-    start = raw[0, 0]
-    end = raw[0, 0]
-
-    rate = raw[0, 1]
-    band = (rate >= high) * 0 + (mid <= rate < high) * 1 + (low <= rate < mid) * 2 + (rate < low) * 3
-    bands = ['>= 80%', '>= 60% & < 80%', '>= 40% & < 60%', '< 40%']
-
-    bout = [[], [], [], []]
-    bouts = [{'time': dt.timedelta(), 'rates': [], 'count': 0}, {'time': dt.timedelta(), 'rates': [], 'count': 0},
-             {'time': dt.timedelta(), 'rates': [], 'count': 0}, {'time': dt.timedelta(), 'rates': [], 'count': 0}]
-
+    bands = ['>= 80%', '< 80% & >= 60% & < 80%', '>= 40% & < 60%', '< 40%']
     stats = ['Date', 'Number of Data Points', 'Mean HR Overall', 'Median HR Overall', 'Min HR Overall',
              'Max HR Overall',
              'Number of Bouts at HR {}'.format(bands[0]), 'Total Time Spent (min) at HR {}'.format(bands[0]),
@@ -112,7 +92,27 @@ def analyze(raw, patient, age, shell):
              'Median HR for Time Spent (min) at HR {}'.format(bands[3]),
              'Min HR for Time Spent (min) at HR {}'.format(bands[3])]
 
+    # patient heart rate params
+    pred = 220 - age
+    high = 0.8 * pred
+    mid = 0.6 * pred
+    low = 0.4 * pred
+
+    data = []
+    datum = []  # stores all heart rate data for one day
+    bout = [[], [], [], []]  # stores bouts of heart rate data for each band
+    bouts = [{'time': dt.timedelta(), 'rates': [], 'count': 0}, {'time': dt.timedelta(), 'rates': [], 'count': 0},
+             {'time': dt.timedelta(), 'rates': [], 'count': 0}, {'time': dt.timedelta(), 'rates': [], 'count': 0}]
+
+    # first row of data
+    today = raw[0, 0].date()
+    start = raw[0, 0]
+    end = raw[0, 0]
+    rate = raw[0, 1]
+    band = (rate >= high) * 0 + (mid <= rate < high) * 1 + (low <= rate < mid) * 2 + (rate < low) * 3
+
     print 'analyzing data...'
+    progress = Progress(len(raw), shell)
 
     for day, rate in raw:
         if day.date() == today:
