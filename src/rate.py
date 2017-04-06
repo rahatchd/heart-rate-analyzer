@@ -5,6 +5,17 @@ import sys
 from progress import Progress
 
 
+def update_band(rate, bound):
+    """
+    Updates activity band by using multiplexing
+
+    :param rate: current heart rate
+    :param bound: band activity bounds
+    :return: current activity band
+    """
+    return sum([i * (bound[i][0] <= rate < bound[i][1]) for i in range(4)])
+
+
 def median(x):
     """
     Compute the median of a given list
@@ -126,6 +137,8 @@ def analyze(raw, patient, age, shell):
                     bout[band] = []
                 start = day
                 end = day
+                band = update_band(rate, bound)
+                bout[band] = [rate]
             else:  # store the bout
                 bouts[band]['time'] += (end - start)
                 bouts[band]['rates'].extend(bout[band])
@@ -134,9 +147,10 @@ def analyze(raw, patient, age, shell):
                 bout[band] = []
                 start = day
                 end = day
+                band = update_band(rate, bound)
+                bout[band] = [rate]
 
-            # update activity band using multiplexing
-            band = (rate >= high) * 0 + (mid <= rate < high) * 1 + (low <= rate < mid) * 2 + (rate < low) * 3
+            band = update_band(rate, bound)
 
         else:
             row = aggregate(datum, bouts, today, bands)
