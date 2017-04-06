@@ -99,9 +99,9 @@ def analyze(raw, patient, age, shell):
     low = 0.4 * pred
     bound = [[high, 1000], [mid, high], [low, mid], [-1, low]]
 
-    data = []
-    datum = []  # stores all heart rate data for one day
-    bout = [[], [], [], []]  # stores bouts of heart rate data for each band
+    data = []  # stores heart rate data for each day
+    datum = []  # stores heart rate data for current day
+    bout = [[], [], [], []]  # stores bouts of heart rate data for each activity band
     bouts = [{'time': dt.timedelta(), 'rates': [], 'count': 0}, {'time': dt.timedelta(), 'rates': [], 'count': 0},
              {'time': dt.timedelta(), 'rates': [], 'count': 0}, {'time': dt.timedelta(), 'rates': [], 'count': 0}]
 
@@ -118,15 +118,15 @@ def analyze(raw, patient, age, shell):
     for day, rate in raw:
         if day.date() == today:
             datum.append(rate)
-            if bound[band][0] <= rate < bound[band][1]:
+            if bound[band][0] <= rate < bound[band][1]:  # check if rate falls inside range of current activity band
                 bout[band].append(rate)
                 end = day
-            elif end - start < interval:
+            elif end - start < interval:  # check if bout was long enough
                 if len(bout[band]) > 0:
                     bout[band] = []
                 start = day
                 end = day
-            else:
+            else:  # store the bout
                 bouts[band]['time'] += (end - start)
                 bouts[band]['rates'].extend(bout[band])
                 bouts[band]['count'] += 1
@@ -135,6 +135,7 @@ def analyze(raw, patient, age, shell):
                 start = day
                 end = day
 
+            # update activity band using multiplexing
             band = (rate >= high) * 0 + (mid <= rate < high) * 1 + (low <= rate < mid) * 2 + (rate < low) * 3
 
         else:
