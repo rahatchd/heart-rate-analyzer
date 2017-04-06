@@ -1,3 +1,4 @@
+from __future__ import division
 import datetime as dt
 import csv
 import sys
@@ -15,7 +16,7 @@ def median(x):
         return x[0]
     x = sorted(x)
     even = len(x) % 2 == 0
-    return (x[len(x) / 2 + 1] + even * x[len(x) / 2]) / (even + 1.)
+    return (x[len(x) // 2 + 1] + even * x[len(x) // 2]) / (even + 1.)
 
 
 def analyze(raw, patient, age, shell):
@@ -52,17 +53,17 @@ def analyze(raw, patient, age, shell):
 
     stats = ['Date', 'Number of Data Points', 'Mean HR Overall', 'Median HR Overall', 'Min HR Overall',
              'Max HR Overall',
-             'Number of Bouts at HR >= 80%', 'Total Time Spent at HR >= 80%', 'Mean HR for Time Spent at HR >= 80%',
-             'Median HR for Time Spent at HR >= 80%', 'Min HR for Time Spent at HR >= 80%',
+             'Number of Bouts at HR >= 80%', 'Total Time Spent (min) at HR >= 80%', 'Mean HR for Time Spent (min) at HR >= 80%',
+             'Median HR for Time Spent (min) at HR >= 80%', 'Min HR for Time Spent (min) at HR >= 80%',
 
-             'Number of Bouts at HR >= 60%', 'Total Time Spent at HR >= 60%', 'Mean HR for Time Spent at HR >= 60%',
-             'Median HR for Time Spent at HR >= 60%', 'Min HR for Time Spent at HR >= 60%',
+             'Number of Bouts at HR >= 60%', 'Total Time Spent (min) at HR >= 60%', 'Mean HR for Time Spent (min) at HR >= 60%',
+             'Median HR for Time Spent (min) at HR >= 60%', 'Min HR for Time Spent (min) at HR >= 60%',
 
-             'Number of Bouts at HR >= 40%', 'Total Time Spent at HR >= 40%', 'Mean HR for Time Spent at HR >= 40%',
-             'Median HR for Time Spent at HR >= 40%', 'Min HR for Time Spent at HR >= 40%',
+             'Number of Bouts at HR >= 40%', 'Total Time Spent (min) at HR >= 40%', 'Mean HR for Time Spent (min) at HR >= 40%',
+             'Median HR for Time Spent (min) at HR >= 40%', 'Min HR for Time Spent (min) at HR >= 40%',
 
-             'Number of Bouts at HR < 40%', 'Total Time Spent at HR < 40%', 'Mean HR for Time Spent at HR < 40%',
-             'Median HR for Time Spent at HR < 40%', 'Min HR for Time Spent at HR < 40%']
+             'Number of Bouts at HR < 40%', 'Total Time Spent (min) at HR < 40%', 'Mean HR for Time Spent (min) at HR < 40%',
+             'Median HR for Time Spent (min) at HR < 40%', 'Min HR for Time Spent (min) at HR < 40%']
 
     print 'analyzing data...'
 
@@ -145,7 +146,7 @@ def analyze(raw, patient, age, shell):
             bout_times = [x['time'].total_seconds() for x in bouts]
             row = {'Date': today,
                    'Number of Data Points': len(datum),
-                   'Mean HR Overall': float(sum(datum)) / len(datum),
+                   'Mean HR Overall': round(sum(datum) / len(datum), 1),
                    'Median HR Overall': median(datum),
                    'Min HR Overall': datum[0],
                    'Max HR Overall': datum[-1]}
@@ -153,64 +154,60 @@ def analyze(raw, patient, age, shell):
             if len(bouts[0]['rates']) > 0:
                 row.update({
                     'Number of Bouts at HR >= 80%': bouts[0]['count'],
-                    'Total Time Spent at HR >= 80%': '{} hours {} minutes'.format(bout_times[0] // 3600,
-                                                                                  (bout_times[0] % 3600) // 60),
-                    'Mean HR for Time Spent at HR >= 80%': sum(bouts[0]['rates']) / len(bouts[0]['rates']),
-                    'Median HR for Time Spent at HR >= 80%': median(sorted(bouts[0]['rates'])),
-                    'Min HR for Time Spent at HR >= 80%': min(bouts[0]['rates'])})
+                    'Total Time Spent (min) at HR >= 80%': round(bout_times[0] / 60, 1),
+                    'Mean HR for Time Spent (min) at HR >= 80%': round(sum(bouts[0]['rates']) / len(bouts[0]['rates']), 1),
+                    'Median HR for Time Spent (min) at HR >= 80%': median(sorted(bouts[0]['rates'])),
+                    'Min HR for Time Spent (min) at HR >= 80%': min(bouts[0]['rates'])})
             else:
                 row.update({'Number of Bouts at HR >= 80%': 'NO DATA',
-                            'Total Time Spent at HR >= 80%': 'NO DATA',
-                            'Mean HR for Time Spent at HR >= 80%': 'NO DATA',
-                            'Median HR for Time Spent at HR >= 80%': 'NO DATA',
-                            'Min HR for Time Spent at HR >= 80%': 'NO DATA'})
+                            'Total Time Spent (min) at HR >= 80%': 'NO DATA',
+                            'Mean HR for Time Spent (min) at HR >= 80%': 'NO DATA',
+                            'Median HR for Time Spent (min) at HR >= 80%': 'NO DATA',
+                            'Min HR for Time Spent (min) at HR >= 80%': 'NO DATA'})
 
             if len(bouts[1]['rates']) > 0:
                 row.update({
                     'Number of Bouts at HR >= 60%': bouts[1]['count'],
-                    'Total Time Spent at HR >= 60%': '{} hours {} minutes'.format(bout_times[1] // 3600,
-                                                                                  (bout_times[1] % 3600) // 60),
-                    'Mean HR for Time Spent at HR >= 60%': sum(bouts[1]['rates']) / len(bouts[1]['rates']),
-                    'Median HR for Time Spent at HR >= 60%': median(sorted(bouts[1]['rates'])),
-                    'Min HR for Time Spent at HR >= 60%': min(bouts[1]['rates'])})
+                    'Total Time Spent (min) at HR >= 60%': round(bout_times[1] / 60, 1),
+                    'Mean HR for Time Spent (min) at HR >= 60%': round(sum(bouts[1]['rates']) / len(bouts[1]['rates']), 1),
+                    'Median HR for Time Spent (min) at HR >= 60%': median(sorted(bouts[1]['rates'])),
+                    'Min HR for Time Spent (min) at HR >= 60%': min(bouts[1]['rates'])})
             else:
                 row.update({'Number of Bouts at HR >= 60%': 'NO DATA',
-                            'Total Time Spent at HR >= 60%': 'NO DATA',
-                            'Mean HR for Time Spent at HR >= 60%': 'NO DATA',
-                            'Median HR for Time Spent at HR >= 60%': 'NO DATA',
-                            'Min HR for Time Spent at HR >= 60%': 'NO DATA'})
+                            'Total Time Spent (min) at HR >= 60%': 'NO DATA',
+                            'Mean HR for Time Spent (min) at HR >= 60%': 'NO DATA',
+                            'Median HR for Time Spent (min) at HR >= 60%': 'NO DATA',
+                            'Min HR for Time Spent (min) at HR >= 60%': 'NO DATA'})
 
             if len(bouts[2]['rates']) > 0:
                 row.update({
                     'Number of Bouts at HR >= 40%': bouts[2]['count'],
-                    'Total Time Spent at HR >= 40%': '{} hours {} minutes'.format(bout_times[2] // 3600,
-                                                                                  (bout_times[2] % 3600) // 60),
-                    'Mean HR for Time Spent at HR >= 40%': sum(bouts[2]['rates']) / len(bouts[2]['rates']),
-                    'Median HR for Time Spent at HR >= 40%': median(sorted(bouts[2]['rates'])),
-                    'Min HR for Time Spent at HR >= 40%': min(bouts[2]['rates'])})
+                    'Total Time Spent (min) at HR >= 40%': round(bout_times[2] / 60, 1),
+                    'Mean HR for Time Spent (min) at HR >= 40%': round(sum(bouts[2]['rates']) / len(bouts[2]['rates']), 1),
+                    'Median HR for Time Spent (min) at HR >= 40%': median(sorted(bouts[2]['rates'])),
+                    'Min HR for Time Spent (min) at HR >= 40%': min(bouts[2]['rates'])})
 
             else:
                 row.update({'Number of Bouts at HR >= 40%': 'NO DATA',
-                            'Total Time Spent at HR >= 40%': 'NO DATA',
-                            'Mean HR for Time Spent at HR >= 40%': 'NO DATA',
-                            'Median HR for Time Spent at HR >= 40%': 'NO DATA',
-                            'Min HR for Time Spent at HR >= 40%': 'NO DATA'})
+                            'Total Time Spent (min) at HR >= 40%': 'NO DATA',
+                            'Mean HR for Time Spent (min) at HR >= 40%': 'NO DATA',
+                            'Median HR for Time Spent (min) at HR >= 40%': 'NO DATA',
+                            'Min HR for Time Spent (min) at HR >= 40%': 'NO DATA'})
 
             if len(bouts[3]['rates']) > 0:
                 row.update({
                     'Number of Bouts at HR < 40%': bouts[3]['count'],
-                    'Total Time Spent at HR < 40%': '{} hours {} minutes'.format(bout_times[3] // 3600,
-                                                                                 (bout_times[3] % 3600) // 60),
-                    'Mean HR for Time Spent at HR < 40%': sum(bouts[3]['rates']) / len(bouts[3]['rates']),
-                    'Median HR for Time Spent at HR < 40%': median(sorted(bouts[3]['rates'])),
-                    'Min HR for Time Spent at HR < 40%': min(bouts[3]['rates'])
+                    'Total Time Spent (min) at HR < 40%': round(bout_times[3] / 60, 1),
+                    'Mean HR for Time Spent (min) at HR < 40%': round(sum(bouts[3]['rates']) / len(bouts[3]['rates']), 1),
+                    'Median HR for Time Spent (min) at HR < 40%': median(sorted(bouts[3]['rates'])),
+                    'Min HR for Time Spent (min) at HR < 40%': min(bouts[3]['rates'])
                 })
             else:
                 row.update({'Number of Bouts at HR < 40%': 'NO DATA',
-                            'Total Time Spent at HR < 40%': 'NO DATA',
-                            'Mean HR for Time Spent at HR < 40%': 'NO DATA',
-                            'Median HR for Time Spent at HR < 40%': 'NO DATA',
-                            'Min HR for Time Spent at HR < 40%': 'NO DATA'})
+                            'Total Time Spent (min) at HR < 40%': 'NO DATA',
+                            'Mean HR for Time Spent (min) at HR < 40%': 'NO DATA',
+                            'Median HR for Time Spent (min) at HR < 40%': 'NO DATA',
+                            'Min HR for Time Spent (min) at HR < 40%': 'NO DATA'})
 
             data.append(row)
 
@@ -232,7 +229,7 @@ def analyze(raw, patient, age, shell):
     bout_times = [x['time'].total_seconds() for x in bouts]
     row = {'Date': today,
            'Number of Data Points': len(datum),
-           'Mean HR Overall': float(sum(datum)) / len(datum),
+           'Mean HR Overall': round(sum(datum) / len(datum), 1),
            'Median HR Overall': median(datum),
            'Min HR Overall': datum[0],
            'Max HR Overall': datum[-1]}
@@ -240,64 +237,60 @@ def analyze(raw, patient, age, shell):
     if len(bouts[0]['rates']) > 0:
         row.update({
             'Number of Bouts at HR >= 80%': bouts[0]['count'],
-            'Total Time Spent at HR >= 80%': '{} hours {} minutes'.format(bout_times[0] // 3600,
-                                                                          (bout_times[0] % 3600) // 60),
-            'Mean HR for Time Spent at HR >= 80%': sum(bouts[0]['rates']) / len(bouts[0]['rates']),
-            'Median HR for Time Spent at HR >= 80%': median(sorted(bouts[0]['rates'])),
-            'Min HR for Time Spent at HR >= 80%': min(bouts[0]['rates'])})
+            'Total Time Spent (min) at HR >= 80%': round(bout_times[0] / 60, 1),
+            'Mean HR for Time Spent (min) at HR >= 80%': round(sum(bouts[0]['rates']) / len(bouts[0]['rates']), 1),
+            'Median HR for Time Spent (min) at HR >= 80%': median(sorted(bouts[0]['rates'])),
+            'Min HR for Time Spent (min) at HR >= 80%': min(bouts[0]['rates'])})
     else:
         row.update({'Number of Bouts at HR >= 80%': 'NO DATA',
-                    'Total Time Spent at HR >= 80%': 'NO DATA',
-                    'Mean HR for Time Spent at HR >= 80%': 'NO DATA',
-                    'Median HR for Time Spent at HR >= 80%': 'NO DATA',
-                    'Min HR for Time Spent at HR >= 80%': 'NO DATA'})
+                    'Total Time Spent (min) at HR >= 80%': 'NO DATA',
+                    'Mean HR for Time Spent (min) at HR >= 80%': 'NO DATA',
+                    'Median HR for Time Spent (min) at HR >= 80%': 'NO DATA',
+                    'Min HR for Time Spent (min) at HR >= 80%': 'NO DATA'})
 
     if len(bouts[1]['rates']) > 0:
         row.update({
             'Number of Bouts at HR >= 60%': bouts[1]['count'],
-            'Total Time Spent at HR >= 60%': '{} hours {} minutes'.format(bout_times[1] // 3600,
-                                                                          (bout_times[1] % 3600) // 60),
-            'Mean HR for Time Spent at HR >= 60%': sum(bouts[1]['rates']) / len(bouts[1]['rates']),
-            'Median HR for Time Spent at HR >= 60%': median(sorted(bouts[1]['rates'])),
-            'Min HR for Time Spent at HR >= 60%': min(bouts[1]['rates'])})
+            'Total Time Spent (min) at HR >= 60%': round(bout_times[1] / 60, 1),
+            'Mean HR for Time Spent (min) at HR >= 60%': round(sum(bouts[1]['rates']) / len(bouts[1]['rates']), 1),
+            'Median HR for Time Spent (min) at HR >= 60%': median(sorted(bouts[1]['rates'])),
+            'Min HR for Time Spent (min) at HR >= 60%': min(bouts[1]['rates'])})
     else:
         row.update({'Number of Bouts at HR >= 60%': 'NO DATA',
-                    'Total Time Spent at HR >= 60%': 'NO DATA',
-                    'Mean HR for Time Spent at HR >= 60%': 'NO DATA',
-                    'Median HR for Time Spent at HR >= 60%': 'NO DATA',
-                    'Min HR for Time Spent at HR >= 60%': 'NO DATA'})
+                    'Total Time Spent (min) at HR >= 60%': 'NO DATA',
+                    'Mean HR for Time Spent (min) at HR >= 60%': 'NO DATA',
+                    'Median HR for Time Spent (min) at HR >= 60%': 'NO DATA',
+                    'Min HR for Time Spent (min) at HR >= 60%': 'NO DATA'})
 
     if len(bouts[2]['rates']) > 0:
         row.update({
             'Number of Bouts at HR >= 40%': bouts[2]['count'],
-            'Total Time Spent at HR >= 40%': '{} hours {} minutes'.format(bout_times[2] // 3600,
-                                                                          (bout_times[2] % 3600) // 60),
-            'Mean HR for Time Spent at HR >= 40%': sum(bouts[2]['rates']) / len(bouts[2]['rates']),
-            'Median HR for Time Spent at HR >= 40%': median(sorted(bouts[2]['rates'])),
-            'Min HR for Time Spent at HR >= 40%': min(bouts[2]['rates'])})
+            'Total Time Spent (min) at HR >= 40%': round(bout_times[2] / 60, 1),
+            'Mean HR for Time Spent (min) at HR >= 40%': round(sum(bouts[2]['rates']) / len(bouts[2]['rates']), 1),
+            'Median HR for Time Spent (min) at HR >= 40%': median(sorted(bouts[2]['rates'])),
+            'Min HR for Time Spent (min) at HR >= 40%': min(bouts[2]['rates'])})
 
     else:
         row.update({'Number of Bouts at HR >= 40%': 'NO DATA',
-                    'Total Time Spent at HR >= 40%': 'NO DATA',
-                    'Mean HR for Time Spent at HR >= 40%': 'NO DATA',
-                    'Median HR for Time Spent at HR >= 40%': 'NO DATA',
-                    'Min HR for Time Spent at HR >= 40%': 'NO DATA'})
+                    'Total Time Spent (min) at HR >= 40%': 'NO DATA',
+                    'Mean HR for Time Spent (min) at HR >= 40%': 'NO DATA',
+                    'Median HR for Time Spent (min) at HR >= 40%': 'NO DATA',
+                    'Min HR for Time Spent (min) at HR >= 40%': 'NO DATA'})
 
     if len(bouts[3]['rates']) > 0:
         row.update({
             'Number of Bouts at HR < 40%': bouts[3]['count'],
-            'Total Time Spent at HR < 40%': '{} hours {} minutes'.format(bout_times[3] // 3600,
-                                                                         (bout_times[3] % 3600) // 60),
-            'Mean HR for Time Spent at HR < 40%': sum(bouts[3]['rates']) / len(bouts[3]['rates']),
-            'Median HR for Time Spent at HR < 40%': median(sorted(bouts[3]['rates'])),
-            'Min HR for Time Spent at HR < 40%': min(bouts[3]['rates'])
+            'Total Time Spent (min) at HR < 40%': round(bout_times[3] / 60, 1),
+            'Mean HR for Time Spent (min) at HR < 40%': round(sum(bouts[3]['rates']) / len(bouts[3]['rates']), 1),
+            'Median HR for Time Spent (min) at HR < 40%': median(sorted(bouts[3]['rates'])),
+            'Min HR for Time Spent (min) at HR < 40%': min(bouts[3]['rates'])
         })
     else:
         row.update({'Number of Bouts at HR < 40%': 'NO DATA',
-                    'Total Time Spent at HR < 40%': 'NO DATA',
-                    'Mean HR for Time Spent at HR < 40%': 'NO DATA',
-                    'Median HR for Time Spent at HR < 40%': 'NO DATA',
-                    'Min HR for Time Spent at HR < 40%': 'NO DATA'})
+                    'Total Time Spent (min) at HR < 40%': 'NO DATA',
+                    'Mean HR for Time Spent (min) at HR < 40%': 'NO DATA',
+                    'Median HR for Time Spent (min) at HR < 40%': 'NO DATA',
+                    'Min HR for Time Spent (min) at HR < 40%': 'NO DATA'})
 
     data.append(row)
 
